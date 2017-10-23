@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="A basic popup page">
+    <meta name="author" content="Joey Wang">
+
+    <title>Popup Page</title>
+
+    <!-- Scripts -->
+    <script src="jquery-3.2.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="popup.js"></script>
+
+    <!-- Cascading Style Sheets -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="css/custom.css" rel="stylesheet" media="screen">
+</head>
+
+<body>
+    <nav class="navbar navbar-default" role="navigation">
+        <a class="navbar-brand">Rave Tool</a>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">All functions<b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="#">
+                                <div id="expand" class="function">Expand Left Navigation</div>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <div id="contract" class="function">Contract Left Navigation</div>
+                            </a>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a href="#">
+                                <form class="form-inline">
+                                    <div id="startClock" class="function">Start Clock by
+                                        <input class="form-control" style="width:50%" type="text" id="clockTime" name="clockTime" placeholder="Minutes">
+                                    </div>
+                                </form>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <div id="stopClock" class="function">Stop Clock for the Page</div>
+                            </a>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a href="#">
+                                <form class="form-inline">
+                                    <div id="startRefresh" class="function">Refresh M Pages by
+                                        <input class="form-control" style="width:50%" type="text" id="refreshTime" name="refreshTime" placeholder="Minutes">
+                                    </div>
+                                </form>
+                            </a>
+
+                        </li>
+                        <li>
+                            <a href="#">
+                                <div id="stopRefresh" class="function">Stop Refresh</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" data-title = "General&nbspDisclaimer,&nbspHelp&nbspand&nbspContributor" data-toggle="popover" data-placement="bottom" 
+                    data-content="<p>Please use with <b>cautious</b> and have fun!<br>
+                    Tool 1: Expand or contract the left navigation in Rave EDC<br>
+                    Tool 2: Start clock for one page<br>
+                    Tool 3: Refresh all Medidata pages<br>
+                    <br>
+                    Version 1.0.1 12-OCT-2017 Joey Wang</p>" data-html="true" data-animation="true">About this Tool </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+</body>
+
+</html>
