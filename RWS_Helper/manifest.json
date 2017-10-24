@@ -1,0 +1,23 @@
+{
+  "name": "RWS Helper",
+  "version": "0.1.6",
+  "description": "This extension lets you do the basic get/post functions via RWS",
+  "short_name": "RWS Helper",
+  "browser_action": {
+    "default_icon": "images/icon16.png",
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "images/icon16.png",
+    "32": "images/icon32.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+  "background": {
+    "scripts": []
+  },
+  "permissions": [
+    "tabs", "https://www.imedidata.com/*", "https://*/RaveWebServices/*"
+  ],
+  "manifest_version": 2
+}
