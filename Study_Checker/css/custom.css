@@ -1,0 +1,14 @@
+body {
+  width: 600px;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  background-color: #eee;
+}
+
+.headerText {
+  padding-top: 10px;
+}
+
+p {
+  word-break: break-all
+}

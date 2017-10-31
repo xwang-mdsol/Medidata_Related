@@ -1,0 +1,126 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Popup for RWS API Test</title>
+
+  <!-- Cascading Style Sheets -->
+  <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+  <link href="css/custom.css" rel="stylesheet" media="screen">
+
+  <!-- Scripts -->
+  <script src="js/jquery-3.2.1.min.js"></script>
+  <script src="js/popper.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/popup.js"></script>
+
+
+</head>
+
+<body>
+
+
+
+  <div class="container">
+    <div class="row justify-content-end">
+      <a id="helper" href="#" class="badge badge-light">Help</a>
+    </div>
+    <div class="row justify-content-center">
+      <h2>Rave Web Service Helper</h2>
+    </div>
+    <div class="row">
+      <div class="col-5">
+        <h5 class="headerText">Account information</h5>
+
+        <input type="user" id="inputUser" class="form-control" placeholder="User Account">
+        <input type="password" id="inputPassword" class="form-control" placeholder="Password">
+
+        <div class="form-group">
+          <h5 class="headerText">Request Type</h5>
+          <select class="form-control" id="requestType">
+            <option>GET</option>
+            <option>POST</option>
+          </select>
+        </div>
+
+        <button class="btn btn-lg btn-warning btn-block" id="reset" type="button">
+          Reset
+        </button>
+
+
+        <button class="btn btn-lg btn-info btn-block" id="saveResult" type="button">
+          <a download="Result.txt" id="downloadLink">Download</a>
+        </button>
+        <button class="btn btn-lg btn-danger btn-block" id="lockAll" type="button">
+          <a download="LockData.txt" id="downloadLockLink">Download Lock</a>
+        </button>
+      </div>
+      <div class="col-7">
+        <button id="inputConfirm" class="btn btn-sm btn-primary btn-block" type="button" data-toggle="collapse" data-target="#contentCollapse"
+          aria-expanded="false" aria-controls="contentCollapse">
+          Confirm Account Information
+        </button>
+
+        <div class="collapse" id="contentCollapse">
+          <div class="card card-body">
+            <div class="form-group getInfo">
+              <h5 class="headerText">GET Type</h5>
+              <select class="form-control" id="getType">
+                <option>Clinical Data</option>
+                <option>Metadata</option>
+              </select>
+            </div>
+            <h5 class="headerText">Host</h5>
+            <input id="host" class="form-control" placeholder="EX.: trainingj4" required>
+
+            <div class="getInfo">
+              <h5 class="headerText">Study OID</h5>
+              <input id="studyOID" class="form-control" placeholder="EX.: 00_site (DEV)" required>
+              <div class="clinical">
+                <h5 class="headerText">Form OID</h5>
+                <input id="formOID" class="form-control" placeholder="EX.: EN_AE1" required>
+                <div class="form-group">
+                  <h5 class="headerText">Data Type</h5>
+                  <select class="form-control" id="dataType">
+                    <option>regular</option>
+                    <option>raw</option>
+                  </select>
+                </div>
+
+              </div>
+              <div class="metadata">
+                <div class="form-group">
+
+                </div>
+              </div>
+            </div>
+            <div class="postInfo">
+              <div class="form-group">
+                <h5 class="headerText">Post Contents</h5>
+                <textarea id="postContent" class="form-control custom-control" rows="8" style="resize:none" placeholder="EX.: <ODM></ODM>"></textarea>
+              </div>
+            </div>
+            <button class="btn btn-lg btn-success btn-block" id="httpRequest" type="button">
+              Request
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="jumbotron jumbotron-fluid">
+          <div class="container">
+            <div class="row">
+              <div class="col-12">
+                <p class="lead" id="urlRequest">
+                </p>
+                <p class="lead" id="httpResponse">
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</body>
+
+</html>

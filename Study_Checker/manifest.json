@@ -1,0 +1,23 @@
+{
+  "name": "Rave EDC Study Status Checker",
+  "version": "0.0.1",
+  "description": "This extension lets you to check the study status of Rave EDC",
+  "short_name": "Study Checker",
+  "browser_action": {
+    "default_icon": "images/icon16.png",
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "images/icon16.png",
+    "32": "images/icon32.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+  "background": {
+    "scripts": []
+  },
+  "permissions": [
+    "tabs", "https://www.imedidata.com/*"
+  ],
+  "manifest_version": 2
+}
