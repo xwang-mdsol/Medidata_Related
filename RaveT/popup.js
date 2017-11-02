@@ -38,35 +38,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
 window.onload = function () {
 
-        document.getElementById("startRefresh").onclick = function (e) {
-            var rTime = document.getElementById('refreshTime').value
-            startRefresh(rTime);
-        }
-        document.getElementById("stopRefresh").onclick = function (e) {
-            console.log(e);
-            stopRefresh();
-        }
-
+    document.getElementById("startRefresh").onclick = function (e) {
+        var rTime = document.getElementById('refreshTime').value
+        startRefresh(rTime);
     }
-    //get the refresh started based on the time from the input
-function startRefresh(refreshTime = "null") {
-    console.log("startRefresh");
-    chrome.runtime.sendMessage({
-            type: "start",
-            time: refreshTime
-        },
-        function (response) {
-            console.log(response.msg);
-        });
-}
+    document.getElementById("stopRefresh").onclick = function (e) {
+        console.log(e);
+        stopRefresh();
+    }
 
-//stop all refresh
-function stopRefresh() {
-    console.log("stopRefresh");
-    chrome.runtime.sendMessage({
-            type: "stop"
-        },
-        function (response) {
-            console.log(response.msg);
-        });
 }
