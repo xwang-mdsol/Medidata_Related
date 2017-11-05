@@ -1,4 +1,5 @@
 //JS for the popup page
+var studyGroups = [];
 
 $(document).ready(function () {
 
@@ -11,7 +12,9 @@ $(document).ready(function () {
     })
 
 
-
+    $(".study").click(function () {
+        console.log($(this).attr('id'));
+    })
 
     //helper badge clicked
     $("#helper").click(function () {
@@ -41,8 +44,8 @@ function popup(e) {
         chrome.tabs.sendMessage(activeTab.id, {
             "message": e.target.id
         }, function (response) {
-
-            createResponseTable(response.groups);
+            getAllData(response.groups);
+            createResponseTable();
         });
     });
 }
@@ -54,31 +57,90 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 });
 
+//Get all the necessary data from iMedidata
+function getAllData(response) {
+    console.log(response);
+    for (i = 0; i < response.length; i++) {
+        var studyGroupURL = createAllURL(response[i].groupID, "group");
+        var studyGroupName = response[i].groupName;
+        studyGroups.push({
+            studyGroupName: studyGroupName,
+            studyGroupURL: studyGroupURL,
+            studies: []
+        })
+        getStudiesFromMedidata(studyGroupURL, i);
+    }
+    console.log(studyGroups);
+
+
+}
 
 //Helper function create table in the popup page
-function createResponseTable(response) {
-
-    console.log(response);
+function createResponseTable() {
+    console.log("run");
     var table = $('<table></table>').addClass('table table-sm');
 
-    for (i = 0; i < response.length; i++) {
-        var row = $('<tr></tr>');
+    for (i = 0; i < studyGroups.length; i++) {
+        var row = $('<tr id="' + i + '"></tr>');
         var noCell = $('<th></th>').text(i + 1);
         var contentCell = $('<td></td>');
-        var studyGroupURL = createStudyGroupURL(response[i].groupID);
-        var contentAnchor = $('<a></a>').text(response[i].groupName).attr('href', studyGroupURL);
+        var contentAnchor = $('<a class="study" id= "study_' + i + '"></a>').text(studyGroups[i].studyGroupName).attr('href', studyGroups[i].studyGroupURL);
+
         contentCell.append(contentAnchor);
         row.append(noCell);
         row.append(contentCell);
         table.append(row);
+
     }
     $('#response').append(table);
 }
 
 //Helper function to create the study group url
-function createStudyGroupURL(studyID) {
-    var studyGroupURL = "https://www.imedidata.com/study_groups/" + studyID + "/studies";
-    return studyGroupURL;
+function createAllURL(id, type) {
+    if (type == "group") {
+        var url = "https://www.imedidata.com/study_groups/" + id + "/studies";
+    } else if (type == "study") {
+        var url = "https://www.imedidata.com/studies/" + id + "/sites";
+    }
+    return url;
+}
+
+//Get the studies inforamtion from iMedidata
+function getStudiesFromMedidata(studyURL, studyNumber) {
+    studies = [];
+    return $.ajax({
+        type: 'GET',
+        url: studyURL,
+        datatype: 'html',
+        success: function (data) {
+            var studies = [];
+            var table = $(data).find('tbody');
+            studyAnchors = table.find('a');
+            //console.log(studyAnchors);
+            if (studyAnchors.length == 0) {
+                studies = {
+                    error: "No study"
+                };
+            }
+            for (i = 0; i < studyAnchors.length; i++) {
+                var studyURL = createAllURL(studyAnchors[i].id, "study");
+                studies.push({
+                    studyURL: studyURL,
+                    studyName: studyAnchors[i].innerText
+                });
+            }
+            //console.log(studies);
+            studyGroups[studyNumber].studies = studies;
+        },
+        error: function (data) {
+            console.log(data);
+            studyGroups[studyNumber].studies = {
+                error: data.statusText
+            };
+        }
+
+    });
+
 }
 
 //Helper function to get the error response from xml string
