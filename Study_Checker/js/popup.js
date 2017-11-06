@@ -1,20 +1,12 @@
 //JS for the popup page
 var studyGroups = [];
+var isTableExisting = false;
 
 $(document).ready(function () {
 
 
-    //confirm button clicked
-    $("#getStudyGroup").click(function () {
-
-        $("#studyGroupResponse").html("Loading...");
-
-    })
 
 
-    $(".study").click(function () {
-        console.log($(this).attr('id'));
-    })
 
     //helper badge clicked
     $("#helper").click(function () {
@@ -30,7 +22,10 @@ $(document).ready(function () {
     })
 });
 
+// $("#getStudyGroup").click(function () {
+//     $("#studyGroupResponse").html("Loading...");
 
+// })
 
 //send message back based on the id to content.js
 function popup(e) {
@@ -52,6 +47,7 @@ function popup(e) {
 
 document.addEventListener("DOMContentLoaded", function () {
     var buttons = document.querySelectorAll('button.function');
+    console.log(buttons);
     for (var i = 0; i < buttons.length; i++) {
         buttons[i].addEventListener("click", popup);
     };
@@ -60,6 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
 //Get all the necessary data from iMedidata
 function getAllData(response) {
     console.log(response);
+    studyGroups = [];
     for (i = 0; i < response.length; i++) {
         var studyGroupURL = createAllURL(response[i].groupID, "group");
         var studyGroupName = response[i].groupName;
@@ -75,16 +72,15 @@ function getAllData(response) {
 
 }
 
-//Helper function create table in the popup page
+//Helper function to create table in the popup page
 function createResponseTable() {
-    console.log("run");
-    var table = $('<table></table>').addClass('table table-sm');
+    var table = $('<table id="result"></table>').addClass('table table-sm');
 
     for (i = 0; i < studyGroups.length; i++) {
-        var row = $('<tr id="' + i + '"></tr>');
+        var row = $('<tr id="row_' + i + '"></tr>');
         var noCell = $('<th></th>').text(i + 1);
         var contentCell = $('<td></td>');
-        var contentAnchor = $('<a class="study" id= "study_' + i + '"></a>').text(studyGroups[i].studyGroupName).attr('href', studyGroups[i].studyGroupURL);
+        var contentAnchor = $('<a class="studyGroup" id= "study_' + i + '"></a>').text(studyGroups[i].studyGroupName).attr('href', studyGroups[i].studyGroupURL);
 
         contentCell.append(contentAnchor);
         row.append(noCell);
@@ -92,7 +88,105 @@ function createResponseTable() {
         table.append(row);
 
     }
-    $('#response').append(table);
+    if (isTableExisting == false) {
+        $('#response').append(table);
+        isTableExisting = true;
+        $(".studyGroup").click(function (event) {
+            event.preventDefault();
+            createResponseStudy(event);
+        })
+    }
+}
+
+//Helper function to create studies after clicked each study group
+function createResponseStudy(event) {
+    console.log(event.target);
+    var no = parseInt(event.target.id.split("_")[1]);
+    console.log(typeof (no));
+    var studies = studyGroups[no].studies;
+    var studyGroupRow = $("#row_" + no);
+    var studyGroupInfo = $(studyGroupRow).find('.studyGroup');
+    var errorText = "";
+    console.log(studies);
+    if (studies.length == 0) {
+        errorText = studyGroupInfo.text().split(" - Loading")[0] + " - Loading";
+        studyGroupInfo.text(errorText);
+        setTimeout(function () {
+            studyGroupInfo.text(studyGroupInfo.text().split(" - Loading")[0]);
+        }, 2000)
+    } else if (studies.error == "No Study") {
+        errorText = studyGroupInfo.text().split(" - No study created yet")[0] + " - No study created yet";
+        studyGroupInfo.text(errorText);
+    } else if (studies.error == "Not Found") {
+        errorText = studyGroupInfo.text().split(" - No study group owner access")[0] + " - No study group owner access";
+        studyGroupInfo.text(errorText);
+    } else if (studies.isLoaded == undefined) {
+        for (i = studies.length - 1; i >= 0; i--) {
+            studyName = (studies[i].studyName.split("(", 2)[0] + '(' + studies[i].studyName.split("(", 2)[1]).substr(0, 50);
+            var j = i + 1;
+            studyGroupRow.after('<tr id="studies_' + studies[i].studyID + '"><td class="text-success">Study ' + j +
+                '</td><td><a class="env srow_' + i + '" id="site_' + studies[i].studyID + '" href="' +
+                studies[i].studyURL + '">' + studyName + '</a></td></tr>');
+        }
+        studies.isLoaded = true;
+    } else if (studies.isLoaded == true) {
+        $('.studies_' + no).hide();
+        studies.isLoaded = false;
+    } else if (studies.isLoaded == false) {
+        $('.studies_' + no).show();
+        studies.isLoaded = true;
+    } else {
+        console.log("Other");
+    }
+
+    if (studies.isLoaded == true) {
+        $(".env").click(function (event) {
+            event.preventDefault();
+            createResponseSite(event, studies);
+        })
+    }
+
+}
+
+//Helper function to create site reponse
+function createResponseSite(event, studies) {
+
+    var no = parseInt($(event.target).attr('class').split("_")[1]);
+    var id = parseInt(event.target.id.split("_")[1]);
+    console.log(no);
+    console.log(typeof (no));
+    var sites = studies[no];
+    var studyRow = $("#site_" + id);
+    var studyInfo = $(studyRow).find('.env');
+    var errorText = "";
+    console.log(studies);
+    if (sites.length == 0) {
+        errorText = studyInfo.text().split(" - Loading")[0] + " - Loading";
+        studyInfo.text(errorText);
+        setTimeout(function () {
+            studyInfo.text(studyGroupInfo.text().split(" - Loading")[0]);
+        }, 2000)
+    } else if (sites.error == "No Site") {
+        errorText = studyGroupInfo.text().split(" - No site created yet")[0] + " - No site created yet";
+        studyGroupInfo.text(errorText);
+    } else if (sites.isLoaded == undefined) {
+        for (i = sites.length - 1; i >= 0; i--) {
+            studyName = (sites[i].studyName.split("(", 2)[0] + '(' + studies[i].studyName.split("(", 2)[1]).substr(0, 50);
+            var j = i + 1;
+            studyGroupRow.after('<tr id="sites_' + sites[i].studyID + '"><td class="text-success">Study ' + j +
+                '</td><td><a class="env" id="site_' + sites[i].studyID + '" href="' +
+                sites[i].studyURL + '">' + studyName + '</a></td></tr>');
+        }
+        sites.isLoaded = true;
+    } else if (sites.isLoaded == true) {
+        $('.sites_' + no).hide();
+        sites.isLoaded = false;
+    } else if (sites.isLoaded == false) {
+        $('.sites_' + no).show();
+        sites.isLoaded = true;
+    } else {
+        console.log("Other");
+    }
 }
 
 //Helper function to create the study group url
@@ -106,11 +200,10 @@ function createAllURL(id, type) {
 }
 
 //Get the studies inforamtion from iMedidata
-function getStudiesFromMedidata(studyURL, studyNumber) {
-    studies = [];
+function getStudiesFromMedidata(studyGroupURL, studyGroupNumber) {
     return $.ajax({
         type: 'GET',
-        url: studyURL,
+        url: studyGroupURL,
         datatype: 'html',
         success: function (data) {
             var studies = [];
@@ -119,28 +212,64 @@ function getStudiesFromMedidata(studyURL, studyNumber) {
             //console.log(studyAnchors);
             if (studyAnchors.length == 0) {
                 studies = {
-                    error: "No study"
+                    error: "No Study"
                 };
             }
             for (i = 0; i < studyAnchors.length; i++) {
-                var studyURL = createAllURL(studyAnchors[i].id, "study");
+                var studyID = studyAnchors[i].id.split("_")[1];
+                var studyURL = createAllURL(studyID, "study");
                 studies.push({
                     studyURL: studyURL,
-                    studyName: studyAnchors[i].innerText
+                    studyName: studyAnchors[i].innerText,
+                    studyID: studyID,
+                    sites: []
                 });
+                studyNumber = i;
+                getSitesFromMedidata(studyURL, studyGroupNumber, studyNumber)
             }
             //console.log(studies);
-            studyGroups[studyNumber].studies = studies;
+            studyGroups[studyGroupNumber].studies = studies;
         },
         error: function (data) {
             console.log(data);
-            studyGroups[studyNumber].studies = {
+            studyGroups[studyGroupNumber].studies = {
                 error: data.statusText
             };
         }
 
     });
 
+}
+
+//ajax call to get all sites information
+function getSitesFromMedidata(studyURL, studyGroupNumber, studyNumber) {
+    return $.ajax({
+        type: 'GET',
+        url: studyURL,
+        datatype: 'html',
+        success: function (data) {
+            var sites = [];
+            var table = $(data).find('tbody');
+            siteAnchors = table.find('span a');
+            //console.log(siteAnchors);
+            if (siteAnchors.length == 0) {
+                sites = {
+                    error: "No Site"
+                };
+            }
+            for (i = 0; i < siteAnchors.length; i++) {
+                var siteID = siteAnchors[i].id.split("_")[2];
+                studyGroups[studyGroupNumber].studies[studyNumber].sites.push({
+                    siteName: siteAnchors[i].innerText,
+                    siteID: siteID
+                });
+            }
+        },
+        error: function (data) {
+            console.log(data);
+        }
+
+    });
 }
 
 //Helper function to get the error response from xml string
