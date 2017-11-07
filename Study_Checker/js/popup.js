@@ -1,13 +1,9 @@
 //JS for the popup page
 var studyGroups = [];
 var isTableExisting = false;
+var iMedidataURL = "https://www.imedidata.com/?ticket";
 
 $(document).ready(function () {
-
-
-
-
-
     //helper badge clicked
     $("#helper").click(function () {
         console.log("learn.mdsol.com");
@@ -22,12 +18,30 @@ $(document).ready(function () {
     })
 });
 
-// $("#getStudyGroup").click(function () {
-//     $("#studyGroupResponse").html("Loading...");
+//Add the listener to the get study group button
+document.addEventListener("DOMContentLoaded", function () {
+    var buttons = document.querySelectorAll('button.function');
+    //console.log(buttons);
+    //Close the window and show the alert if iMedidata has not been logged
+    chrome.tabs.query({
+        currentWindow: true,
+        active: true
+    }, function (tabs) {
+        var activeTab = tabs[0];
+        if (!activeTab.url.includes(iMedidataURL)) {
+            alert("Please log into iMedidata home page first and run this again!");
+            window.close();
+        };
+    });
 
-// })
+    for (var i = 0; i < buttons.length; i++) {
+        buttons[i].addEventListener("click", popup);
+    };
+});
 
-//send message back based on the id to content.js
+
+//send message back based on the id to content.js, mainly get data from
+//content page and then get the groups from it and create responseTable from that
 function popup(e) {
     console.log(e);
     chrome.tabs.query({
@@ -45,39 +59,12 @@ function popup(e) {
     });
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    var buttons = document.querySelectorAll('button.function');
-    console.log(buttons);
-    for (var i = 0; i < buttons.length; i++) {
-        buttons[i].addEventListener("click", popup);
-    };
-});
-
-//Get all the necessary data from iMedidata
-function getAllData(response) {
-    console.log(response);
-    studyGroups = [];
-    for (i = 0; i < response.length; i++) {
-        var studyGroupURL = createAllURL(response[i].groupID, "group");
-        var studyGroupName = response[i].groupName;
-        studyGroups.push({
-            studyGroupName: studyGroupName,
-            studyGroupURL: studyGroupURL,
-            studies: []
-        })
-        getStudiesFromMedidata(studyGroupURL, i);
-    }
-    console.log(studyGroups);
-
-
-}
-
 //Helper function to create table in the popup page
 function createResponseTable() {
     var table = $('<table id="result"></table>').addClass('table table-sm');
 
     for (i = 0; i < studyGroups.length; i++) {
-        var row = $('<tr id="row_' + i + '"></tr>');
+        var row = $('<tr class="text-danger" id="row_' + i + '"></tr>');
         var noCell = $('<th></th>').text(i + 1);
         var contentCell = $('<td></td>');
         var contentAnchor = $('<a class="studyGroup" id= "study_' + i + '"></a>').text(studyGroups[i].studyGroupName).attr('href', studyGroups[i].studyGroupURL);
@@ -86,7 +73,6 @@ function createResponseTable() {
         row.append(noCell);
         row.append(contentCell);
         table.append(row);
-
     }
     if (isTableExisting == false) {
         $('#response').append(table);
@@ -107,7 +93,7 @@ function createResponseStudy(event) {
     var studyGroupRow = $("#row_" + no);
     var studyGroupInfo = $(studyGroupRow).find('.studyGroup');
     var errorText = "";
-    console.log(studies);
+    //console.log(studies);
     if (studies.length == 0) {
         errorText = studyGroupInfo.text().split(" - Loading")[0] + " - Loading";
         studyGroupInfo.text(errorText);
@@ -124,7 +110,7 @@ function createResponseStudy(event) {
         for (i = studies.length - 1; i >= 0; i--) {
             studyName = (studies[i].studyName.split("(", 2)[0] + '(' + studies[i].studyName.split("(", 2)[1]).substr(0, 50);
             var j = i + 1;
-            studyGroupRow.after('<tr id="studies_' + studies[i].studyID + '"><td class="text-success">Study ' + j +
+            studyGroupRow.after('<tr class="studies_' + no + '" id="studies_' + studies[i].studyID + '"><td class="text-primary">Study ' + j +
                 '</td><td><a class="env srow_' + i + '" id="site_' + studies[i].studyID + '" href="' +
                 studies[i].studyURL + '">' + studyName + '</a></td></tr>');
         }
@@ -153,36 +139,35 @@ function createResponseSite(event, studies) {
 
     var no = parseInt($(event.target).attr('class').split("_")[1]);
     var id = parseInt(event.target.id.split("_")[1]);
-    console.log(no);
-    console.log(typeof (no));
-    var sites = studies[no];
-    var studyRow = $("#site_" + id);
+    //console.log(no);
+    //console.log(typeof (no));
+    var sites = studies[no].sites;
+    var studyRow = $("#studies_" + id);
     var studyInfo = $(studyRow).find('.env');
     var errorText = "";
-    console.log(studies);
+    console.log(sites);
     if (sites.length == 0) {
         errorText = studyInfo.text().split(" - Loading")[0] + " - Loading";
         studyInfo.text(errorText);
         setTimeout(function () {
-            studyInfo.text(studyGroupInfo.text().split(" - Loading")[0]);
+            studyInfo.text(studyInfo.text().split(" - Loading")[0]);
         }, 2000)
     } else if (sites.error == "No Site") {
-        errorText = studyGroupInfo.text().split(" - No site created yet")[0] + " - No site created yet";
-        studyGroupInfo.text(errorText);
+        errorText = studyInfo.text().split(" - No site created yet")[0] + " - No site created yet";
+        studyInfo.text(errorText);
     } else if (sites.isLoaded == undefined) {
         for (i = sites.length - 1; i >= 0; i--) {
-            studyName = (sites[i].studyName.split("(", 2)[0] + '(' + studies[i].studyName.split("(", 2)[1]).substr(0, 50);
+            siteName = sites[i].siteName;
             var j = i + 1;
-            studyGroupRow.after('<tr id="sites_' + sites[i].studyID + '"><td class="text-success">Study ' + j +
-                '</td><td><a class="env" id="site_' + sites[i].studyID + '" href="' +
-                sites[i].studyURL + '">' + studyName + '</a></td></tr>');
+            studyRow.after('<tr class="sites_' + id + '" id="' + sites[i].siteID + '"><td class="text-success">Site ' + j +
+                '</td><td><a class="site" id="siteID_' + sites[i].siteID + '" href="#">' + siteName + '</a></td></tr>');
         }
         sites.isLoaded = true;
     } else if (sites.isLoaded == true) {
-        $('.sites_' + no).hide();
+        $('.sites_' + id).hide();
         sites.isLoaded = false;
     } else if (sites.isLoaded == false) {
-        $('.sites_' + no).show();
+        $('.sites_' + id).show();
         sites.isLoaded = true;
     } else {
         console.log("Other");
@@ -197,6 +182,24 @@ function createAllURL(id, type) {
         var url = "https://www.imedidata.com/studies/" + id + "/sites";
     }
     return url;
+}
+
+
+//Get all the necessary study group data from iMedidata
+function getAllData(response) {
+    console.log(response);
+    studyGroups = [];
+    for (i = 0; i < response.length; i++) {
+        var studyGroupURL = createAllURL(response[i].groupID, "group");
+        var studyGroupName = response[i].groupName;
+        studyGroups.push({
+            studyGroupName: studyGroupName,
+            studyGroupURL: studyGroupURL,
+            studies: []
+        })
+        getStudiesFromMedidata(studyGroupURL, i);
+    }
+    console.log(studyGroups);
 }
 
 //Get the studies inforamtion from iMedidata
@@ -227,7 +230,6 @@ function getStudiesFromMedidata(studyGroupURL, studyGroupNumber) {
                 studyNumber = i;
                 getSitesFromMedidata(studyURL, studyGroupNumber, studyNumber)
             }
-            //console.log(studies);
             studyGroups[studyGroupNumber].studies = studies;
         },
         error: function (data) {
@@ -243,6 +245,7 @@ function getStudiesFromMedidata(studyGroupURL, studyGroupNumber) {
 
 //ajax call to get all sites information
 function getSitesFromMedidata(studyURL, studyGroupNumber, studyNumber) {
+
     return $.ajax({
         type: 'GET',
         url: studyURL,
@@ -250,7 +253,15 @@ function getSitesFromMedidata(studyURL, studyGroupNumber, studyNumber) {
         success: function (data) {
             var sites = [];
             var table = $(data).find('tbody');
+            var siteNameAnchors = [];
+            //Get site name after site number
             siteAnchors = table.find('span a');
+            table.find('tr').each(function () {
+                siteNameAnchors.push($(this).find("td:eq(1)"));
+            });
+
+            console.log(siteAnchors);
+            console.log(siteNameAnchors);
             //console.log(siteAnchors);
             if (siteAnchors.length == 0) {
                 sites = {
@@ -259,59 +270,20 @@ function getSitesFromMedidata(studyURL, studyGroupNumber, studyNumber) {
             }
             for (i = 0; i < siteAnchors.length; i++) {
                 var siteID = siteAnchors[i].id.split("_")[2];
-                studyGroups[studyGroupNumber].studies[studyNumber].sites.push({
-                    siteName: siteAnchors[i].innerText,
+                sites.push({
+                    siteName: siteNameAnchors[i][0].innerText,
                     siteID: siteID
                 });
             }
+            studyGroups[studyGroupNumber].studies[studyNumber].sites = sites;
         },
         error: function (data) {
             console.log(data);
+            studyGroups[studyGroupNumber].studies[studyNumber].sites = {
+                error: data.statusText
+            };
         }
-
     });
-}
-
-//Helper function to get the error response from xml string
-function getErrorString(response) {
-    var message;
-    if (response === undefined || response === "") {
-        message = "Error not defined";
-    } else if (response.includes("DOCTYPE html")) {
-        message = response;
-    } else if (response.includes("</ODM>")) {
-        var xml = $.parseXML(response);
-        console.log(xml);
-        message = $(xml).find('ODM').attr('mdsol:ErrorDescription');
-    } else if (response.includes("</Response>")) {
-        message = response.split("ErrorClientResponseMessage=")[1].split(">")[0];
-    } else {
-        message = response.split("mdsol:ErrorDescription=")[1].split("xmlns=")[0];
-    }
-    console.log(message);
-    return message;
-}
-
-//Helper function for converting xml result to string
-function xmlToString(xmlData) {
-
-    var xmlString;
-    //IE
-    if (window.ActiveXObject) {
-        xmlString = xmlData.xml;
-    }
-    // code for Mozilla, Firefox, Opera, etc.
-    else {
-        xmlString = (new XMLSerializer()).serializeToString(xmlData);
-    }
-    return xmlString;
-}
-
-//Helper function to get the authentication
-function make_base_auth(user, password) {
-    var tok = user + ':' + password;
-    var hash = btoa(tok);
-    return 'Basic ' + hash;
 }
 
 //Make text file
