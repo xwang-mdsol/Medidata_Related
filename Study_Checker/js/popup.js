@@ -86,6 +86,7 @@ function createResponseTable() {
 
 //Helper function to create studies after clicked each study group
 function createResponseStudy(event) {
+    console.log(studyGroups);
     console.log(event.target);
     var no = parseInt(event.target.id.split("_")[1]);
     console.log(typeof (no));
@@ -115,6 +116,10 @@ function createResponseStudy(event) {
                 studies[i].studyURL + '">' + studyName + '</a></td></tr>');
         }
         studies.isLoaded = true;
+        $(".env").click(function (event) {
+            event.preventDefault();
+            createResponseSite(event, studies);
+        })
     } else if (studies.isLoaded == true) {
         $('.studies_' + no).hide();
         studies.isLoaded = false;
@@ -125,18 +130,11 @@ function createResponseStudy(event) {
         console.log("Other");
     }
 
-    if (studies.isLoaded == true) {
-        $(".env").click(function (event) {
-            event.preventDefault();
-            createResponseSite(event, studies);
-        })
-    }
-
 }
 
 //Helper function to create site reponse
 function createResponseSite(event, studies) {
-
+    console.log(studies);
     var no = parseInt($(event.target).attr('class').split("_")[1]);
     var id = parseInt(event.target.id.split("_")[1]);
     //console.log(no);
@@ -255,13 +253,13 @@ function getSitesFromMedidata(studyURL, studyGroupNumber, studyNumber) {
             var table = $(data).find('tbody');
             var siteNameAnchors = [];
             //Get site name after site number
-            siteAnchors = table.find('span a');
+            var siteAnchors = table.find('span a');
             table.find('tr').each(function () {
                 siteNameAnchors.push($(this).find("td:eq(1)"));
             });
 
-            console.log(siteAnchors);
-            console.log(siteNameAnchors);
+            //console.log(siteAnchors);
+            //console.log(siteNameAnchors);
             //console.log(siteAnchors);
             if (siteAnchors.length == 0) {
                 sites = {
