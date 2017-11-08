@@ -1,7 +1,9 @@
 //JS for the popup page
 var studyGroups = [];
 var isTableExisting = false;
-var iMedidataURL = "https://www.imedidata.com/?ticket";
+var isStudyListenerAdded = false;
+var iMedidataURL = "https://www.imedidata.com/";
+var iMedidataURL1 = "https://www.imedidata.com/?ticket";
 
 $(document).ready(function () {
     //helper badge clicked
@@ -28,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
         active: true
     }, function (tabs) {
         var activeTab = tabs[0];
-        if (!activeTab.url.includes(iMedidataURL)) {
+        if (!(activeTab.url.includes(iMedidataURL1) || activeTab.url == iMedidataURL)) {
             alert("Please log into iMedidata home page first and run this again!");
             window.close();
         };
@@ -112,14 +114,14 @@ function createResponseStudy(event) {
             studyName = (studies[i].studyName.split("(", 2)[0] + '(' + studies[i].studyName.split("(", 2)[1]).substr(0, 50);
             var j = i + 1;
             studyGroupRow.after('<tr class="studies_' + no + '" id="studies_' + studies[i].studyID + '"><td class="text-primary">Study ' + j +
-                '</td><td><a class="env srow_' + i + '" id="site_' + studies[i].studyID + '" href="' +
+                '</td><td><a class="env studies_' + no + ' srow_' + i + '" id="site_' + studies[i].studyID + '" href="' +
                 studies[i].studyURL + '">' + studyName + '</a></td></tr>');
+            $("#site_" + studies[i].studyID).click(function (event) {
+                event.preventDefault();
+                createResponseSite(event);
+            })
         }
         studies.isLoaded = true;
-        $(".env").click(function (event) {
-            event.preventDefault();
-            createResponseSite(event, studies);
-        })
     } else if (studies.isLoaded == true) {
         $('.studies_' + no).hide();
         studies.isLoaded = false;
@@ -133,13 +135,14 @@ function createResponseStudy(event) {
 }
 
 //Helper function to create site reponse
-function createResponseSite(event, studies) {
-    console.log(studies);
-    var no = parseInt($(event.target).attr('class').split("_")[1]);
+function createResponseSite(event) {
+    var no = parseInt($(event.target).attr('class').split("_")[2]);
     var id = parseInt(event.target.id.split("_")[1]);
-    //console.log(no);
+    var sgNo = parseInt($(event.target).attr('class').split("_")[1])
+    console.log(no);
+    console.log(sgNo);
     //console.log(typeof (no));
-    var sites = studies[no].sites;
+    var sites = studyGroups[sgNo].studies[no].sites;
     var studyRow = $("#studies_" + id);
     var studyInfo = $(studyRow).find('.env');
     var errorText = "";
@@ -157,7 +160,7 @@ function createResponseSite(event, studies) {
         for (i = sites.length - 1; i >= 0; i--) {
             siteName = sites[i].siteName;
             var j = i + 1;
-            studyRow.after('<tr class="sites_' + id + '" id="' + sites[i].siteID + '"><td class="text-success">Site ' + j +
+            studyRow.after('<tr class="studies_' + sgNo + ' sites_' + id + '" id="' + sites[i].siteID + '"><td class="text-success">Site ' + j +
                 '</td><td><a class="site" id="siteID_' + sites[i].siteID + '" href="#">' + siteName + '</a></td></tr>');
         }
         sites.isLoaded = true;

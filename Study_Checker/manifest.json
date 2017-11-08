@@ -1,6 +1,6 @@
 {
   "name": "Rave EDC Study Status Checker",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "This extension lets you to check the study status of Rave EDC",
   "short_name": "Study Checker",
   "browser_action": {
